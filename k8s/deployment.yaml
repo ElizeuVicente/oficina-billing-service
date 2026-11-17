@@ -34,7 +34,9 @@ kind: Service
 metadata:
   name: oficina-billing
 spec:
+  type: NodePort
   selector: {app: oficina-billing}
   ports:
     - port: 8081
       targetPort: 8081
+      nodePort: 30082
