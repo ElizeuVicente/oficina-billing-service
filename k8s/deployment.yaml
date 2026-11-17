@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oficina-billing
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: oficina-billing}
+  template:
+    metadata:
+      labels: {app: oficina-billing}
+    spec:
+      containers:
+        - name: billing
+          image: oficina-billing:local
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - secretRef: {name: oficina-billing-config}
+          readinessProbe:
+            httpGet: {path: /actuator/health, port: 8081}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /actuator/health, port: 8081}
+            initialDelaySeconds: 45
+            periodSeconds: 20
+          resources:
+            requests: {cpu: 100m, memory: 384Mi}
+            limits: {cpu: '1', memory: 768Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oficina-billing
+spec:
+  selector: {app: oficina-billing}
+  ports:
+    - port: 8081
+      targetPort: 8081
